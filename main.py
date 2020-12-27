@@ -52,23 +52,7 @@ squares = []
 # FUNCTIONS
 ###############################################################################
 
-# ============================================================================
-# check if number is correct correct Number object
-# ============================================================================
-def check_number(num):
-    # error handling: ensure that Number is either
-    # int between 0 and SIZE of Sudoko
-    try:
-        number = int(num)
-        if number >= 0 and number <= SIZE:
-            return number
-        else:
-            sys.exit("Error: number in Sudoku not in range")
-
-    # OR: None
-    except:
-        return None
-
+helpers = Helpers(SIZE)
 
 # ============================================================================
 # return correct Number object
@@ -89,20 +73,17 @@ def update_cell(row_idx, col_idx, num, is_fix=False):
 
     number = get_number(num)
     cell = cells[row_idx][col_idx]
-    row = rows[row_idx]
-    column = columns[col_idx]
-    square = squares[row_idx//helpers.get_square_size()][col_idx//helpers.get_square_size()]
 
     # Cell <-> Number
+    # => Row / Column / Square updates automatically
     cell.number(number)
-    number.add_cell(cell)
+    number.add_cell(row_idx, col_idx, cell)
+
 
 
 ###############################################################################
 # MAIN
 ###############################################################################
-
-helpers = Helpers(SIZE)
 
 
 # CREATE INITIAL STRUCTURES
@@ -124,8 +105,8 @@ for row in range(0, SIZE):
     cells.append(cells_in_row)
 
 # 3.1) Row -> Cell -> Number
-for row_dx in range(0, SIZE):
-    rows.append(Row(row_dx, cells[row_dx]))
+for row_idx in range(0, SIZE):
+    rows.append(Row(row_idx, cells[row_idx]))
 
 # 3.2) Column -> Cell -> Number
 temp_columns = []
@@ -174,7 +155,13 @@ for os_row_idx in range(0, helpers.get_square_size()):
 # CONNECT STRUCTURES
 # ==================
 
-# 1) Number -> Row / Column / Square
+# Cell <-> Row / Column / Square
+for row_idx in range(0, SIZE):
+    for col_idx in range(0, SIZE):
+        cells[row_idx][col_idx].row(rows[row_idx])
+        cells[row_idx][col_idx].column(columns[col_idx])
+        cells[row_idx][col_idx].square(squares[row_idx//helpers.get_square_size()][col_idx//helpers.get_square_size()])
+
 
 
 # FILL INITAL NUMBERS
@@ -182,13 +169,16 @@ for os_row_idx in range(0, helpers.get_square_size()):
 
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
-        cell_value = check_number(SUDOKU[row_idx][col_idx])
+        cell_value = helpers.check_number(SUDOKU[row_idx][col_idx])
         if cell_value:
             update_cell(row_idx, col_idx, cell_value, True)
 
 
 # test prints
 print(cells[3][4].number().value())
+print(cells[3][4].row().column(4).number().value())
+print(cells[3][4].column().row(3).number().value())
 print(rows[3].column(4).number().value())
-print(columns[3].row(4).number().value())
+print(columns[4].row(3).number().value())
 print(squares[0][1].cell(1,2).number().value())
+print(numbers[2].counter())

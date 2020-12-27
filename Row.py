@@ -2,13 +2,15 @@
 
 class Row():
 
-    def __init__ (self, id, cells):
-        self.id_ = id
+    def __init__ (self, idx, cells):
+        self.idx_ = idx
         self.cells_ = cells
 
     # GETTER
-    def id(self):
-        return self.id_
+    def idx(self):
+        return self.idx_
 
-    def column(self, column_id):
-        return self.cells_[column_id]
+    def column(self, column_idx):
+        return self.cells_[column_idx]
+
+    

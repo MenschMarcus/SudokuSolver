@@ -2,13 +2,13 @@
 
 class Column():
 
-    def __init__ (self, id, cells):
-        self.id_ = id
+    def __init__ (self, idx, cells):
+        self.idx_ = idx
         self.cells_ = cells
 
     # GETTER
-    def id(self):
-        return self.id_
+    def idx(self):
+        return self.idx_
 
-    def row(self, row_id):
-        return self.cells_[row_id]
+    def row(self, row_idx):
+        return self.cells_[row_idx]

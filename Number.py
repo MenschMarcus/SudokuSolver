@@ -13,22 +13,12 @@ class Number():
             self.value_ = None
         self.counter_ = 0
 
-        # init structures
+        # init cells[row][col] structure
         self.cells_ = []
-        self.rows_ = []
-        self.columns_ = []
         for i in range(0, max):
-            self.rows_.append(None)
-            self.columns_.append(None)
             self.cells_.append([])
             for j in range(0, max):
                 self.cells_[i].append(None)
-
-        self.squares_ = []
-        for i in range(0, int(math.sqrt(max))):
-            self.squares_.append([])
-            for j in range(0, int(math.sqrt(max))):
-                self.squares_[i].append(None)
 
     # GETTER
     def value(self):
@@ -37,12 +27,31 @@ class Number():
     def counter(self):
         return self.counter_
 
-    # SETTER
-    def add_cell(self, cell):
-        pass
-
-    def increase(self):
+    # SET CELLS
+    def add_cell(self, row_idx, col_idx, cell):
+        self.cells_[row_idx][col_idx] = cell
         self.counter_ += 1
 
-    def decrease(self):
+    def remove_cell(self, row_idx, col_idx):
+        self.cells_[row_idx][col_idx] = None
         self.counter_ -= 1
+
+
+
+
+'''
+        self.rows_ = []
+        self.columns_ = []
+        self.squares_ = []
+        for i in range(0, max):
+            self.rows_.append(None)
+            self.columns_.append(None)
+            self.cells_.append([])
+            for j in range(0, max):
+                self.cells_[i].append(None)
+
+        for i in range(0, int(math.sqrt(max))):
+            self.squares_.append([])
+            for j in range(0, int(math.sqrt(max))):
+                self.squares_[i].append(None)
+'''
