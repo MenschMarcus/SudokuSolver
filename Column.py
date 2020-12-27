@@ -15,3 +15,9 @@ class Column():
 
     def cells(self):
         return self.cells_
+
+    def has_number(self, number):
+        for cell in self.cells_:
+            if cell.number() == number:
+                return True
+        return False

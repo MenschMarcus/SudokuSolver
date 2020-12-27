@@ -23,6 +23,7 @@ import math
 ###############################################################################
 
 SIZE = 9
+SUDOKU = SUDOKU_EXPERT
 
 numbers = []
 cells = []
@@ -180,9 +181,18 @@ for row_idx in range(0, SIZE):
 
 print_sudoku()
 print("initially", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+turn_it = 0
 
-for turn_it in range(0,10):
+# --------------------------------------------------------------------------
+# 1) straightforward approach: create potential candidates for each cell
+#    sucessively remove all impossible candidates
+#    => if only one candidate: assign it!
+# --------------------------------------------------------------------------
 
+turn_has_improved = True
+while turn_has_improved and num_fixed_cells < SIZE*SIZE:
+
+    turn_has_improved = False
     for row_idx in range(0, SIZE):
         for col_idx in range(0, SIZE):
             cell = cells[row_idx][col_idx]
@@ -207,17 +217,11 @@ for turn_it in range(0,10):
                         if square_cell.is_fix() and square_cell.number() in candidates:
                             candidates.remove(square_cell.number())
 
-                '''
-                nc = []
-                for c in candidates:
-                    nc.append(str(c.value()))
-                print(row_idx, col_idx, "|", ", ".join(nc), "|", len(nc))
-                '''
-
                 # solve cell or save candidates
                 if len(candidates) == 1:
                     update_cell(cell, candidates[0])
                     num_fixed_cells += 1
+                    turn_has_improved = True
                     # print("update", cell.row().idx(), cell.column().idx(), cell.number().value())
                 if len(candidates) == 0:
                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
@@ -225,7 +229,115 @@ for turn_it in range(0,10):
                     for candidate in candidates:
                         cell.add_candidate(candidate)
 
-    print("after", turn_it+1, "turns", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+    turn_it += 1
+    print("after", turn_it, "turns (1.0)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+
+
+# --------------------------------------------------------------------------
+# 2) check for each row/column/square, a number must appear once
+#    -> determine how many candidates within the row/column/square there are
+#    => if only one candidate: assign it!
+# --------------------------------------------------------------------------
+
+turn_has_improved = True
+while turn_has_improved and num_fixed_cells < SIZE*SIZE:
+    turn_has_improved = False
+
+    # ----------------------------------------------------------------------
+    # 2.1) Column
+    # ----------------------------------------------------------------------
+
+    for column in columns:
+        # check for each number if it is already present in the column
+        numbers_left = []
+        for number in numbers:
+            if not column.has_number(number):
+                numbers_left.append(number)
+        # check for each left over number how many potential candidates
+        # there are in the column
+        for number in numbers_left:
+            candidates = []
+            # check for each cell if
+            # 1. empty, 2. number not is in this row and 3. not in this square
+            for cell in column.cells():
+                if not cell.is_fix() and not cell.row().has_number(number) and not cell.square().has_number(number):
+                    candidates.append(cell)
+            # if only one candidate => set it!
+            if len(candidates) == 1:
+                update_cell(candidates[0], number)
+                num_fixed_cells += 1
+                turn_has_improved = True
+            if len(candidates) == 0:
+                sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+
+    turn_it += 1
+    print("after", turn_it, "turns (2.1)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+
+    # ----------------------------------------------------------------------
+    # 2.2) Row
+    # ----------------------------------------------------------------------
+
+    for row in rows:
+        # check for each number if it is already present in the row
+        numbers_left = []
+        for number in numbers:
+            if not row.has_number(number):
+                numbers_left.append(number)
+        # check for each left over number how many potential candidates
+        # there are in the row
+        for number in numbers_left:
+            candidates = []
+            # check for each cell if
+            # 1. empty, 2. number not is in this column and 3. not in this square
+            for cell in row.cells():
+                if not cell.is_fix() and not cell.column().has_number(number) and not cell.square().has_number(number):
+                    candidates.append(cell)
+            # if only one candidate => set it!
+            if len(candidates) == 1:
+                update_cell(candidates[0], number)
+                num_fixed_cells += 1
+                turn_has_improved = True
+            if len(candidates) == 0:
+                sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+    turn_it += 1
+    print("after", turn_it, "turns (2.2)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+
+    # ----------------------------------------------------------------------
+    # 2.3) Square
+    # ----------------------------------------------------------------------
+
+    for square_row in squares:
+        for square in square_row:
+            # check for each number if it is already present in the square
+            numbers_left = []
+            for number in numbers:
+                if not square.has_number(number):
+                    numbers_left.append(number)
+
+            # check for each left over number how many potential candidates
+            # there are in the row
+            for number in numbers_left:
+                candidates = []
+                # check for each cell if
+                # 1. empty, 2. number not is in this column and 3. not in this square
+                for row_idx in range(0, helpers.get_square_size()):
+                    for col_idx in range(0, helpers.get_square_size()):
+                        cell = square.cell(row_idx, col_idx)
+                        if not cell.is_fix() and not cell.column().has_number(number) and not cell.row().has_number(number):
+                            candidates.append(cell)
+                # if only one candidate => set it!
+                if len(candidates) == 1:
+                    update_cell(candidates[0], number)
+                    num_fixed_cells += 1
+                    turn_has_improved = True
+                if len(candidates) == 0:
+                    sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+    turn_it += 1
+    print("after", turn_it, "turns (2.3)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+
 
 print_sudoku()
 
