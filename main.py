@@ -181,7 +181,7 @@ for row_idx in range(0, SIZE):
 print_sudoku()
 print("initially", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
 
-for turn_it in range(0,5):
+for turn_it in range(0,10):
 
     for row_idx in range(0, SIZE):
         for col_idx in range(0, SIZE):
