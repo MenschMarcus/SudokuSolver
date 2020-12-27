@@ -1,30 +1,11 @@
 #!/usr/bin/env python3
 
 ###############################################################################
-# INPUT
-###############################################################################
-
-SIZE = 9
-X = None
-
-SUDOKU = [
-    [X, 3, X, X, X, 8, 1, 6, X],
-    [X, X, 5, 1, 0, 2, X, X, 9],
-    [X, X, X, 7, X, 4, X, X, X],
-    [X, X, X, X, 2, X, X, 1, 3],
-    [X, X, 2, 9, X, 5, 6, 8, 7],
-    [X, X, 7, X, X, 3, X, X, X],
-    [X, 2, 6, 8, 7, X, X, 5, X],
-    [X, 5, X, X, X, 9, X, X, X],
-    [4, X, X, X, X, 6, X, X, X],
-]
-
-
-###############################################################################
 # IMPORTS
 ###############################################################################
 
 # Classes
+from Sudoku import *
 from Number import Number
 from Cell import Cell
 from Row import Row
@@ -40,6 +21,8 @@ import math
 ###############################################################################
 # GLOBAL VARIABLES
 ###############################################################################
+
+SIZE = 9
 
 numbers = []
 cells = []
@@ -60,7 +43,9 @@ helpers = Helpers(SIZE)
 def get_number(num):
     # error handling: ensure that Number is either:
     # Number between 0 and SIZE of Sudoko
-    if num >= 0 and num <= SIZE:
+    num = helpers.check_number(num)
+
+    if num:
         return numbers[num]
     else:
         return no_number
@@ -69,11 +54,7 @@ def get_number(num):
 # ============================================================================
 # update cell number => update all dependencies
 # ============================================================================
-def update_cell(row_idx, col_idx, num, is_fix=False):
-
-    number = get_number(num)
-    cell = cells[row_idx][col_idx]
-
+def update_cell(cell, number):
     # Cell <-> Number
     # => Row / Column / Square updates automatically
     cell.number(number)
@@ -93,7 +74,7 @@ def update_cell(row_idx, col_idx, num, is_fix=False):
 for i in range(0, SIZE+1):
     numbers.append(Number(i, SIZE))
 # special number: no number
-no_number = Number(False, SIZE)
+no_number = Number(None, SIZE)
 numbers.append(no_number)
 
 # 2) Cell -> Number
@@ -169,16 +150,18 @@ for row_idx in range(0, SIZE):
 
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
-        cell_value = helpers.check_number(SUDOKU[row_idx][col_idx])
-        if cell_value:
-            update_cell(row_idx, col_idx, cell_value, True)
+        number = get_number(SUDOKU[row_idx][col_idx])
+        cell = cells[row_idx][col_idx]
+        update_cell(cell, number)
+
 
 
 # test prints
-print(cells[3][4].number().value())
-print(cells[3][4].row().column(4).number().value())
-print(cells[3][4].column().row(3).number().value())
-print(rows[3].column(4).number().value())
-print(columns[4].row(3).number().value())
-print(squares[0][1].cell(1,2).number().value())
-print(numbers[2].counter())
+# print(cells[3][4].number().value())
+# print(cells[3][4].row().column(4).number().value())
+# print(cells[3][4].column().row(3).number().value())
+# print(rows[3].column(4).number().value())
+# print(columns[4].row(3).number().value())
+# print(squares[0][1].cell(1,2).number().value())
+# print(numbers[2].counter())
+# print(cells[1][7].number().value())

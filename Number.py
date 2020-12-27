@@ -7,7 +7,7 @@ class Number():
     # CONSTRUCTOR
     def __init__ (self, value, max):
 
-        if value >= 0 and value <= max:   # number from )0 to Sudoku SIZE)
+        if value and value >= 0 and value <= max:   # number from )0 to Sudoku SIZE)
             self.value_ = value
         else:       # None = no number
             self.value_ = None

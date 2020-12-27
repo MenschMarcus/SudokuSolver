@@ -20,13 +20,11 @@ class Cell():
         self.row_ = None
         self.column_ = None
         self.number_ = number
-        self.is_fix_ = False
 
     # MAIN DEPENDENCIES: Cell n:1 Row, Column, Square, Number
-    def number(self, number=None, is_fix=False):
+    def number(self, number=None):
         if type(number) == Number:
             self.number_ = number
-            self.is_fix_ = is_fix
         else:
             return self.number_
 
