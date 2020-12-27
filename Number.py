@@ -7,7 +7,7 @@ class Number():
     # CONSTRUCTOR
     def __init__ (self, value, max):
 
-        if value and value >= 0 and value <= max:   # number from )0 to Sudoku SIZE)
+        if value in range(1, max+1):   # number from 0 to (Sudoku SIZE)
             self.value_ = value
         else:       # None = no number
             self.value_ = None
@@ -23,6 +23,9 @@ class Number():
     # GETTER
     def value(self):
         return self.value_
+
+    def has_value(self):
+        return type(self.value_) == int
 
     def counter(self):
         return self.counter_

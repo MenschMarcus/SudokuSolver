@@ -20,6 +20,11 @@ class Cell():
         self.row_ = None
         self.column_ = None
         self.number_ = number
+        self.candidates_ = []
+
+    # GETTER
+    def is_fix(self):
+        return self.number_.value() != None
 
     # MAIN DEPENDENCIES: Cell n:1 Row, Column, Square, Number
     def number(self, number=None):
@@ -45,3 +50,16 @@ class Cell():
             self.square_ = square
         else:
             return self.square_
+
+    # Candidates
+    def add_candidate(self, number):
+        self.candidates_.append(number)
+
+    def remove_candidate(self, number):
+        self.candidates_.remove(number)
+
+    def clear_candidates(self):
+        self.candidates_ = []
+
+    def num_candidates(self):
+        return len(self.candidates_)

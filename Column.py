@@ -12,3 +12,6 @@ class Column():
 
     def row(self, row_idx):
         return self.cells_[row_idx]
+
+    def cells(self):
+        return self.cells_

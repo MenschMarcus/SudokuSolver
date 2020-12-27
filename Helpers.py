@@ -22,10 +22,10 @@ class Helpers():
         # int between 0 and SIZE of Sudoko
         try:
             num = int(num)
-            if num >= 0 and num <= self.size_:
+            if num > 0 and num <= self.size_:
                 return num
             else:
-                sys.exit("Error: number in Sudoku not in range")
+                sys.exit("Error: number", num, "not in range of this Sudoku")
 
         # OR: None
         except:

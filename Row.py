@@ -13,4 +13,5 @@ class Row():
     def column(self, column_idx):
         return self.cells_[column_idx]
 
-    
+    def cells(self):
+        return self.cells_
