@@ -84,7 +84,7 @@ SUDOKU_HARD = [
 SUDOKU_EXPERT = [
 #    0  1  2    3  4  5    6  7  8
 
-    [X, X, X,   5, 2, X,   X, X, X],   # 0
+    [X, X, X,   5, 2, X,   4, X, X],   # 0
     [X, X, X,   4, X, X,   X, X, 1],   # 1
     [X, X, X,   X, 8, X,   9, X, X],   # 2
 

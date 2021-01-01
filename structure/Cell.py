@@ -4,10 +4,9 @@
 # IMPORTS
 ###############################################################################
 
-from Number import Number
-from Row import Row
-from Column import Column
-from Square import Square
+from number.Number import Number
+from structure.Line import Line
+from structure.Square import Square
 
 
 ###############################################################################
@@ -34,13 +33,13 @@ class Cell():
             return self.number_
 
     def row(self, row=None):
-        if type(row) == Row:
+        if type(row) == Line:
             self.row_ = row
         else:
             return self.row_
 
     def column(self, column=None):
-        if type(column) == Column:
+        if type(column) == Line:
             self.column_ = column
         else:
             return self.column_
@@ -63,3 +62,6 @@ class Cell():
 
     def num_candidates(self):
         return len(self.candidates_)
+
+    def get_candidates(self):
+        return self.candidates_

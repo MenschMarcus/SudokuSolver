@@ -6,11 +6,10 @@
 
 # Classes
 from Sudoku import *
-from Number import Number
-from Cell import Cell
-from Row import Row
-from Column import Column
-from Square import Square
+from number.Number import Number
+from structure.Cell import Cell
+from structure.Line import Line
+from structure.Square import Square
 from Helpers import *
 
 # Helpers
@@ -23,6 +22,7 @@ import math
 ###############################################################################
 
 SIZE = 9
+
 SUDOKU = SUDOKU_EXPERT
 
 numbers = []
@@ -108,7 +108,7 @@ for row in range(0, SIZE):
 
 # 3.1) Row -> Cell -> Number
 for row_idx in range(0, SIZE):
-    rows.append(Row(row_idx, cells[row_idx]))
+    rows.append(Line(row_idx, cells[row_idx]))
 
 # 3.2) Column -> Cell -> Number
 temp_columns = []
@@ -121,7 +121,7 @@ for row_idx in range(0, SIZE):
         temp_columns[col_idx].append(cells[row_idx][col_idx])
 
 for col_idx in range(0, SIZE):
-    columns.append(Column(col_idx, temp_columns[col_idx]))
+    columns.append(Line(col_idx, temp_columns[col_idx]))
 
 del temp_columns
 
@@ -133,7 +133,7 @@ for square_row in range(0, helpers.get_square_size()):
     for square_col in range(0, helpers.get_square_size()):
         squares[square_row].append([])
 
-# fill squares with inner sqauares
+# fill squares with inner squares
 # os = outer square
 # is = inner square
 for os_row_idx in range(0, helpers.get_square_size()):
@@ -189,6 +189,7 @@ turn_it = 0
 #    => if only one candidate: assign it!
 # --------------------------------------------------------------------------
 
+'''
 turn_has_improved = True
 while turn_has_improved and num_fixed_cells < SIZE*SIZE:
 
@@ -229,9 +230,19 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                     for candidate in candidates:
                         cell.add_candidate(candidate)
 
+            print_str = ""
+            if cell.is_fix():
+                print_str = "FIX: " + str(cell.number().value())
+            else:
+                cs = cell.get_candidates()
+                c_str = []
+                for c in cs:
+                    c_str.append(str(c.value()))
+                print_str = ", ".join(c_str)
+            print("Z", cell.row().idx()+1, "S", cell.column().idx()+1, ": ", print_str)
+
     turn_it += 1
     print("after", turn_it, "turns (1.0)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
-
 
 # --------------------------------------------------------------------------
 # 2) check for each row/column/square, a number must appear once
@@ -350,3 +361,4 @@ print_sudoku()
 # print(squares[0][1].cell(1,2).number().value())
 # print(numbers[2].counter())
 # print(cells[1][7].number().value())
+'''

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-class Row():
+class Line():
 
     def __init__ (self, idx, cells):
         self.idx_ = idx
@@ -10,11 +10,8 @@ class Row():
     def idx(self):
         return self.idx_
 
-    def column(self, column_idx):
-        return self.cells_[column_idx]
-
-    def cells(self):
-        return self.cells_
+    def cell(self, line_idx):
+        return self.cells_[line_idx]
 
     def has_number(self, number):
         for cell in self.cells_:
