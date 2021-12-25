@@ -3,8 +3,8 @@
 class Line():
 
     def __init__ (self, idx, cells):
-        self.idx_ = idx
-        self.cells_ = cells
+        self.idx_ = idx       # 1 … 9
+        self.cells_ = cells   # 9 cells within the line
 
     # GETTER
     def idx(self):

@@ -6,11 +6,9 @@
 
 # Classes
 from Sudoku import *
-from number.Number import Number
 from structure.Cell import Cell
 from structure.Line import Line
 from structure.Square import Square
-from Helpers import *
 
 # Helpers
 import sys
@@ -23,7 +21,7 @@ import math
 
 SIZE = 9
 
-SUDOKU = SUDOKU_EXPERT
+SUDOKU = SUDOKU_MEDIUM_HARD
 
 numbers = []
 cells = []
@@ -32,55 +30,46 @@ columns = []
 squares = []
 
 num_fixed_cells = 0
+num_turns = 0
 
 
 ###############################################################################
 # FUNCTIONS
 ###############################################################################
 
-helpers = Helpers(SIZE)
-
-# ============================================================================
-# return correct Number object
-# ============================================================================
-def get_number(num):
-    # error handling: ensure that Number is either:
-    # Number between 1 and SIZE of Sudoko
-    num = helpers.check_number(num)
-
-    # NB: there is no 0 in Sudoku! => idx = value-1
-    if num:
-        return numbers[num-1]
-    else:
-        return no_number
-
-
 # ============================================================================
 # update cell number => update all dependencies
 # ============================================================================
 def update_cell(cell, number):
     # Cell <-> Number
-    # => Row / Column / Square updates automatically
+    # => Row / Column / Square updates automatically ?
     cell.number(number)
-    number.add_cell(row_idx, col_idx, cell)
+    # remove all candidates
+
 
 
 # ============================================================================
-# update cell number => update all dependencies
+# print current status of sudoku
 # ============================================================================
-def print_sudoku():
-    print("=========================")
-    print("FINAL SUDOKU")
+def print_sudoku(label=""):
+    global num_fixed_cells
+    global num_turns
+    global SIZE
+
+    print("=================")
     for row_idx in range(0, SIZE):
         nums_in_row = []
         for col_idx in range(0, SIZE):
-            num = cells[row_idx][col_idx].number().value()
+            num = cells[row_idx][col_idx].number()
             if num:
                 nums_in_row.append(str(num))
             else:
-                nums_in_row.append("X")
-        print(", ".join(nums_in_row))
-    print("=========================")
+                nums_in_row.append("·")
+        print(" ".join(nums_in_row))
+    print("=================")
+    print(label, "turn number", num_turns, "|", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "% ) completed!")
+    print("\n")
+
 
 ###############################################################################
 # MAIN
@@ -91,26 +80,24 @@ def print_sudoku():
 # CREATE INITIAL STRUCTURES
 # ============================================================================
 
-# 1) Number
-# NB: there is no 0 in Sudoku! => each numbers value = idx+1 !
-for i in range(0, SIZE):
-    numbers.append(Number(i+1, SIZE))
-# special number: None = no number
-no_number = Number(None, SIZE)
-
-# 2) Cell -> Number
+# Cell -> Number
 for row in range(0, SIZE):
     cells_in_row = []
     for col in range(0, SIZE):
-        # create cell initially with no number(None)
-        cells_in_row.append(Cell(no_number))
+        # Number
+        # NB: there is no 0 in Sudoku! => each number's value = idx+1 !
+        numbers = []
+        for i in range(0, SIZE):
+            numbers.append(i+1)
+        # construct cell with potentially all numbers as candidates
+        cells_in_row.append(Cell(numbers))
     cells.append(cells_in_row)
 
-# 3.1) Row -> Cell -> Number
+# Row -> Cell -> Number
 for row_idx in range(0, SIZE):
     rows.append(Line(row_idx, cells[row_idx]))
 
-# 3.2) Column -> Cell -> Number
+# Column -> Cell -> Number
 temp_columns = []
 
 for col_idx in range(0, SIZE):
@@ -125,41 +112,42 @@ for col_idx in range(0, SIZE):
 
 del temp_columns
 
-# 4) Square -> Cell -> Number
+# Square -> Cell -> Number
+square_size = int(math.sqrt(SIZE))
 
 # prepare structure: square[x][y]
-for square_row in range(0, helpers.get_square_size()):
+for square_row in range(0, square_size):
     squares.append([])
-    for square_col in range(0, helpers.get_square_size()):
+    for square_col in range(0, square_size):
         squares[square_row].append([])
 
 # fill squares with inner squares
-# os = outer square
-# is = inner square
-for os_row_idx in range(0, helpers.get_square_size()):
-    for os_col_idx in range(0, helpers.get_square_size()):
-        # for each square: prepare inner square (same size)
+for outer_square_row_idx in range(0, square_size):
+    for outer_square_col_idx in range(0, square_size):
+        # for each outer square: prepare inner square (same size)
         inner_square = []
-        for is_row in range(0, helpers.get_square_size()):
+        for inner_square_row in range(0, square_size):
             inner_square.append([])
-            for is_col in range(0, helpers.get_square_size()):
-                inner_square[is_row].append([])
+            for inner_square_col in range(0, square_size):
+                inner_square[inner_square_row].append([])
         # for each inner square: obtain inner square containing n cells
-        for is_row_idx in range(0, helpers.get_square_size()):
-            for is_col_idx in range(0, helpers.get_square_size()):
-                cell = cells[os_row_idx*helpers.get_square_size() + is_row_idx][os_col_idx*helpers.get_square_size() + is_col_idx]
-                inner_square[is_row_idx][is_col_idx] = cell
+        for inner_square_row_idx in range(0, square_size):
+            for inner_square_col_idx in range(0, square_size):
+                cell = cells[outer_square_row_idx*square_size + inner_square_row_idx][outer_square_col_idx*square_size + inner_square_col_idx]
+                inner_square[inner_square_row_idx][inner_square_col_idx] = cell
         # create new Square
-        new_square = Square(os_row_idx, os_col_idx, inner_square)
-        squares[os_row_idx][os_col_idx] = new_square
+        new_square = Square(outer_square_row_idx, outer_square_col_idx, inner_square)
+        squares[outer_square_row_idx][outer_square_col_idx] = new_square
 
 
 # Connect Cell <-> Row / Column / Square
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
-        cells[row_idx][col_idx].row(rows[row_idx])
-        cells[row_idx][col_idx].column(columns[col_idx])
-        cells[row_idx][col_idx].square(squares[row_idx//helpers.get_square_size()][col_idx//helpers.get_square_size()])
+        cells[row_idx][col_idx].set_structures(
+            rows[row_idx],          # row
+            columns[col_idx],       # column
+            squares[row_idx//square_size][col_idx//square_size]
+        )
 
 
 # ============================================================================
@@ -168,28 +156,41 @@ for row_idx in range(0, SIZE):
 
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
-        number = get_number(SUDOKU[row_idx][col_idx])
+        # TODO: own structure: Number that cares about error handling
+        # get numbers from original Sudoku
+        cell_value = SUDOKU[row_idx][col_idx]
+
+        # set actual number
+        try:
+            number = int(cell_value)
+            # error handling: number must be in range
+            if number < 0 or number > SIZE:
+                sys.exit("Error: number", number, "not in range of this Sudoku")
+
+        # if no number is given => empty cell => 0
+        except:
+            number = 0
+
+        # print(number)
+
         cell = cells[row_idx][col_idx]
         update_cell(cell, number)
-        if number.has_value():
-            num_fixed_cells += 1
 
+        if number > 0:
+            num_fixed_cells += 1
 
 # ============================================================================
 # CREATE CANDIDATES
 # ============================================================================
-
-print_sudoku()
-print("initially", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
-turn_it = 0
+print_sudoku("INIT ")
 
 # --------------------------------------------------------------------------
-# 1) straightforward approach: create potential candidates for each cell
+# 1) CANDIDATE ELIMINATION
+#    straightforward approach: create potential candidates for each cell
 #    sucessively remove all impossible candidates
-#    => if only one candidate: assign it!
+#    => if only one candidate remains: assign it!
 # --------------------------------------------------------------------------
 
-'''
 turn_has_improved = True
 while turn_has_improved and num_fixed_cells < SIZE*SIZE:
 
@@ -197,57 +198,57 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
     for row_idx in range(0, SIZE):
         for col_idx in range(0, SIZE):
             cell = cells[row_idx][col_idx]
-            cell.clear_candidates()
             if not cell.is_fix():
-                # initially: 10 candidates (each possible number)
-                candidates = []
-                for number in numbers:
-                    candidates.append(number)
                 # each number only once per row
-                for row_cell in cell.row().cells():
-                    if row_cell.is_fix() and row_cell.number() in candidates:
-                        candidates.remove(row_cell.number())
+                # => remove each number in row from list of candiates
+                for idx in range(0, SIZE):
+                    row_cell = cell.row().cell(idx)
+                    if row_cell.is_fix():
+                        cell.remove_candidate(row_cell.number())
                 # each number only once per column
-                for column_cell in cell.column().cells():
-                    if column_cell.is_fix() and column_cell.number() in candidates:
-                        candidates.remove(column_cell.number())
+                # => remove each number in column from list of candiates
+                for idx in range(0, SIZE):
+                    column_cell = cell.column().cell(idx)
+                    if column_cell.is_fix():
+                        cell.remove_candidate(column_cell.number())
                 # each number only once per square
-                for i in range(0, helpers.get_square_size()):
-                    for j in range(0, helpers.get_square_size()):
+                # => remove each number in square from list of candiates
+                for i in range(0, square_size):
+                    for j in range(0, square_size):
                         square_cell = cell.square().cell(i,j)
-                        if square_cell.is_fix() and square_cell.number() in candidates:
-                            candidates.remove(square_cell.number())
+                        if square_cell.is_fix():
+                            cell.remove_candidate(square_cell.number())
 
-                # solve cell or save candidates
-                if len(candidates) == 1:
-                    update_cell(cell, candidates[0])
+                # solve cell
+                if cell.num_candidates() == 0:
+                    sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+                elif cell.num_candidates() == 1:
+                    update_cell(cell, cell.candidates()[0])
                     num_fixed_cells += 1
                     turn_has_improved = True
-                    # print("update", cell.row().idx(), cell.column().idx(), cell.number().value())
-                if len(candidates) == 0:
-                    sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
-                else:
-                    for candidate in candidates:
-                        cell.add_candidate(candidate)
 
+    num_turns += 1
+    print_sudoku("AFTER CELL CANDIDATE ELIMINATION")
+'''
             print_str = ""
             if cell.is_fix():
-                print_str = "FIX: " + str(cell.number().value())
+                print_str = "FIX: " + str(cell.number())
             else:
-                cs = cell.get_candidates()
+                cs = cell.candidates()
                 c_str = []
                 for c in cs:
                     c_str.append(str(c.value()))
                 print_str = ", ".join(c_str)
             print("Z", cell.row().idx()+1, "S", cell.column().idx()+1, ": ", print_str)
 
-    turn_it += 1
-    print("after", turn_it, "turns (1.0)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
-
+    print("after", num_turns, "turns (1.0)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+'''
 # --------------------------------------------------------------------------
-# 2) check for each row/column/square, a number must appear once
-#    -> determine how many candidates within the row/column/square there are
-#    => if only one candidate: assign it!
+# 2) NUMBER ELIMINATION
+#    check for each row/column/square:
+#       each number must appear exactly once
+#       -> determine how many candidates within the row/column/square there are
+#       => if only one candidate remains: assign it!
 # --------------------------------------------------------------------------
 
 turn_has_improved = True
@@ -255,7 +256,7 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
     turn_has_improved = False
 
     # ----------------------------------------------------------------------
-    # 2.1) Column
+    # Number elimination: Column
     # ----------------------------------------------------------------------
 
     for column in columns:
@@ -270,7 +271,8 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
             candidates = []
             # check for each cell if
             # 1. empty, 2. number not is in this row and 3. not in this square
-            for cell in column.cells():
+            for cell_idx in range(0, SIZE):
+                cell = column.cell(cell_idx)
                 if not cell.is_fix() and not cell.row().has_number(number) and not cell.square().has_number(number):
                     candidates.append(cell)
             # if only one candidate => set it!
@@ -280,13 +282,14 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                 turn_has_improved = True
             if len(candidates) == 0:
                 sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+            # TODO: update candidates for cell? for numbers?
 
+    num_turns += 1
+    print_sudoku("AFTER NUMBER ELIMINATION (COLUMNS)")
 
-    turn_it += 1
-    print("after", turn_it, "turns (2.1)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
 
     # ----------------------------------------------------------------------
-    # 2.2) Row
+    # Number elimination: Row
     # ----------------------------------------------------------------------
 
     for row in rows:
@@ -301,7 +304,8 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
             candidates = []
             # check for each cell if
             # 1. empty, 2. number not is in this column and 3. not in this square
-            for cell in row.cells():
+            for row_idx in range(0, SIZE):
+                cell = row.cell(row_idx)
                 if not cell.is_fix() and not cell.column().has_number(number) and not cell.square().has_number(number):
                     candidates.append(cell)
             # if only one candidate => set it!
@@ -312,11 +316,11 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
             if len(candidates) == 0:
                 sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
 
-    turn_it += 1
-    print("after", turn_it, "turns (2.2)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+    num_turns += 1
+    print_sudoku("AFTER NUMBER ELIMINATION (ROWS)")
 
     # ----------------------------------------------------------------------
-    # 2.3) Square
+    # Number elimination: Square
     # ----------------------------------------------------------------------
 
     for square_row in squares:
@@ -333,8 +337,8 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                 candidates = []
                 # check for each cell if
                 # 1. empty, 2. number not is in this column and 3. not in this square
-                for row_idx in range(0, helpers.get_square_size()):
-                    for col_idx in range(0, helpers.get_square_size()):
+                for row_idx in range(0, square_size):
+                    for col_idx in range(0, square_size):
                         cell = square.cell(row_idx, col_idx)
                         if not cell.is_fix() and not cell.column().has_number(number) and not cell.row().has_number(number):
                             candidates.append(cell)
@@ -346,19 +350,20 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                 if len(candidates) == 0:
                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
 
-    turn_it += 1
-    print("after", turn_it, "turns (2.3)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
+    num_turns += 1
+    print_sudoku("AFTER NUMBER ELIMINATION (SQARES)")
+    '''
 
 
 print_sudoku()
 
 # test prints
-# print(cells[3][4].number().value())
-# print(cells[3][4].row().column(4).number().value())
-# print(cells[3][4].column().row(3).number().value())
-# print(rows[3].column(4).number().value())
-# print(columns[4].row(3).number().value())
-# print(squares[0][1].cell(1,2).number().value())
+# print(cells[3][4].number())
+# print(cells[3][4].row().column(4).number())
+# print(cells[3][4].column().row(3).number())
+# print(rows[3].column(4).number())
+# print(columns[4].row(3).number())
+# print(squares[0][1].cell(1,2).number())
 # print(numbers[2].counter())
-# print(cells[1][7].number().value())
+# print(cells[1][7].number())
 '''

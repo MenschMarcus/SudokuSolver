@@ -1,67 +1,55 @@
 #!/usr/bin/env python3
 
-###############################################################################
-# IMPORTS
-###############################################################################
-
-from number.Number import Number
-from structure.Line import Line
-from structure.Square import Square
-
-
-###############################################################################
-
 class Cell():
 
-    # CONSTRUCTOR
-    def __init__ (self, number):
-        # row and column will later be set by actual Row and Column
+    # CONSTRUCTORs
+    def __init__ (self, numbers):
+        # row, column and square will later be set by actual Row and Column
         self.row_ = None
         self.column_ = None
-        self.number_ = number
-        self.candidates_ = []
+        self.square_ = None
+        self.number_ = None
+        self.candidates_ = numbers
+
+    def set_structures(self, row, column, square):
+        self.row_ = row
+        self.column_ = column
+        self.square_ = square
 
     # GETTER
     def is_fix(self):
-        return self.number_.value() != None
+        return self.number_ != 0
 
-    # MAIN DEPENDENCIES: Cell n:1 Row, Column, Square, Number
+    def row(self):
+        return self.row_
+
+    def column(self):
+        return self.column_
+
+    def square(self):
+        return self.square_
+
+    def candidates(self):
+        return self.candidates_
+
+    # Number (fixed)
+    # TODO: own structure Number cares about error handling
     def number(self, number=None):
-        if type(number) == Number:
+        if type(number) == int:
             self.number_ = number
         else:
             return self.number_
 
-    def row(self, row=None):
-        if type(row) == Line:
-            self.row_ = row
-        else:
-            return self.row_
-
-    def column(self, column=None):
-        if type(column) == Line:
-            self.column_ = column
-        else:
-            return self.column_
-
-    def square(self, square=None):
-        if type(square) == Square:
-            self.square_ = square
-        else:
-            return self.square_
-
-    # Candidates
+    # NumberCandidates
     def add_candidate(self, number):
         self.candidates_.append(number)
 
     def remove_candidate(self, number):
-        self.candidates_.remove(number)
+        if number in self.candidates_:
+            self.candidates_.remove(number)
 
     def clear_candidates(self):
         self.candidates_ = []
 
     def num_candidates(self):
         return len(self.candidates_)
-
-    def get_candidates(self):
-        return self.candidates_

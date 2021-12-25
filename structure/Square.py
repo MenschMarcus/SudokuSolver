@@ -4,9 +4,9 @@ class Square():
 
     # CONSTRUCTOR
     def __init__ (self, row, column, cells):
-        self.row_idx_ = row
-        self.column_idx_ = column
-        self.cells_ = cells
+        self.row_idx_ = row        # 1 … 3
+        self.column_idx_ = column  # 1 … 3
+        self.cells_ = cells        # 1 … 9
 
     # GETTER
     def cell(self, row, column):
