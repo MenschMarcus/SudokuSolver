@@ -33,7 +33,7 @@ class StructureManager():
     # MAIN FUNCTION: setup all structures
     # ==========================================================================
 
-    def setup(self, numbers):
+    def setup(self):
 
         cells = []
         rows = []
@@ -46,7 +46,7 @@ class StructureManager():
         for row in range(0, self.size_):
             cells_in_row = []
             for col in range(0, self.size_):
-                cells_in_row.append(Cell(numbers))
+                cells_in_row.append(Cell())
             cells.append(cells_in_row)
 
         # ----------------------------------------------------------------------
@@ -185,3 +185,6 @@ class StructureManager():
 
     def get_num_fixed_cells(self):
         return self.num_fixed_cells_
+
+    def get_box_size(self):
+        return self.box_size_

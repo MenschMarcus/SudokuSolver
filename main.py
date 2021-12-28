@@ -24,7 +24,8 @@ import math
 # GLOBAL VARIABLES
 ###############################################################################
 
-SUDOKU = SUDOKU_MEDIUM_HARD
+SUDOKU_ID = 3
+
 SIZE = 9
 
 numbers = [None]    # number 0 not present in Sudoku!
@@ -37,25 +38,31 @@ num_turns = 0
 
 
 # =============================================================================
-# setup structures
+# SETUP STRUCTURES
 # =============================================================================
 
-# init managers that need to know each other, as they depend on each other
-# -> bad design!
-number_manager = NumberManager(SIZE)
-structure_manager = StructureManager(SIZE)
-
 # setup numbers
+number_manager = NumberManager(SIZE)
 numbers = number_manager.setup()
 
-# setup cells -> rows, columns, boxes
-[cells, rows, columns, boxes] = structure_manager.setup(numbers)
+# setup structures: cells -> rows, columns, boxes
+structure_manager = StructureManager(SIZE)
+[cells, rows, columns, boxes] = structure_manager.setup()
+
+# initially setup candidates
+for row_idx in range(0, SIZE):
+    for col_idx in range(0, SIZE):
+        for number in numbers:
+            if number:
+                cells[row_idx][col_idx].add_candidate(number)
 
 # fill with clues from initial sudoku ("clues")
+sudoku = SUDOKUS[SUDOKU_ID]
+
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
         # get clue from original Sudoku -> Number
-        clue = number_manager.check_number(SUDOKU[row_idx][col_idx])
+        clue = number_manager.check_number(sudoku[row_idx][col_idx])
         if clue is None:
             number = None
         else:
@@ -65,11 +72,14 @@ for row_idx in range(0, SIZE):
         # update Cell <-> Number
         structure_manager.update(cell, number)
 
+box_size = structure_manager.get_box_size()
+
 # test printout
 structure_manager.print_sudoku("INIT ", cells)
 
+
 # ============================================================================
-# CREATE CANDIDATES
+# SOLUTION APPROACHES
 # ============================================================================
 
 # --------------------------------------------------------------------------
@@ -78,15 +88,15 @@ structure_manager.print_sudoku("INIT ", cells)
 #    sucessively remove all impossible candidates
 #    => if only one candidate remains: assign it!
 # --------------------------------------------------------------------------
-'''
 turn_has_improved = True
-while turn_has_improved and num_fixed_cells < SIZE*SIZE:
+while turn_has_improved:
 
     turn_has_improved = False
     for row_idx in range(0, SIZE):
         for col_idx in range(0, SIZE):
             cell = cells[row_idx][col_idx]
             if not cell.is_fix():
+
                 # each number only once per row
                 # => remove each number in row from list of candiates
                 for idx in range(0, SIZE):
@@ -111,13 +121,13 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                 if cell.num_candidates() == 0:
                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
                 elif cell.num_candidates() == 1:
-                    update_cell(cell, cell.candidates()[0])
-                    num_fixed_cells += 1
+                    structure_manager.update(cell, cell.candidate())
                     turn_has_improved = True
 
     num_turns += 1
-    print_sudoku("AFTER CELL CANDIDATE ELIMINATION")
-'''
+
+structure_manager.print_sudoku("AFTER CELL CANDIDATE ELIMINATION", cells)
+
 #             print_str = ""
 #             if cell.is_fix():
 #                 print_str = "FIX: " + str(cell.number())
