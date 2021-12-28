@@ -352,9 +352,19 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
 
     num_turns += 1
     print_sudoku("AFTER NUMBER ELIMINATION (SQARES)")
-    '''
+
+# --------------------------------------------------------------------------
+# 3) BACKTRACKING
+#    for all remaning non-fixed cells:
+#       pick one with a minumum number of candidates
+#       randomly guess one number
+#       save the state
+#       check if sudoku can be solved
+#           if error: trace back to state and guess other number
+# --------------------------------------------------------------------------
 
 
+'''
 print_sudoku()
 
 # test prints
