@@ -25,10 +25,9 @@ import math
 ###############################################################################
 
 SUDOKU = SUDOKU_MEDIUM_HARD
-
 SIZE = 9
 
-numbers = []
+numbers = [None]    # number 0 not present in Sudoku!
 cells = []
 rows = []
 columns = []
@@ -56,66 +55,69 @@ numbers = number_manager.setup()
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
         # get clue from original Sudoku -> Number
-        number = number_manager.check_number(SUDOKU[row_idx][col_idx])
+        clue = number_manager.check_number(SUDOKU[row_idx][col_idx])
+        if clue is None:
+            number = None
+        else:
+            number = numbers[clue]
         # get Cell
         cell = cells[row_idx][col_idx]
         # update Cell <-> Number
         structure_manager.update(cell, number)
 
 # test printout
-structure_manager.print_sudoku("INIT ")
+structure_manager.print_sudoku("INIT ", cells)
 
 # ============================================================================
 # CREATE CANDIDATES
 # ============================================================================
 
+# --------------------------------------------------------------------------
+# 1) CANDIDATE ELIMINATION
+#    straightforward approach: create potential candidates for each cell
+#    sucessively remove all impossible candidates
+#    => if only one candidate remains: assign it!
+# --------------------------------------------------------------------------
+'''
+turn_has_improved = True
+while turn_has_improved and num_fixed_cells < SIZE*SIZE:
 
-# # --------------------------------------------------------------------------
-# # 1) CANDIDATE ELIMINATION
-# #    straightforward approach: create potential candidates for each cell
-# #    sucessively remove all impossible candidates
-# #    => if only one candidate remains: assign it!
-# # --------------------------------------------------------------------------
-#
-# turn_has_improved = True
-# while turn_has_improved and num_fixed_cells < SIZE*SIZE:
-#
-#     turn_has_improved = False
-#     for row_idx in range(0, SIZE):
-#         for col_idx in range(0, SIZE):
-#             cell = cells[row_idx][col_idx]
-#             if not cell.is_fix():
-#                 # each number only once per row
-#                 # => remove each number in row from list of candiates
-#                 for idx in range(0, SIZE):
-#                     row_cell = cell.row().cell(idx)
-#                     if row_cell.is_fix():
-#                         cell.remove_candidate(row_cell.number())
-#                 # each number only once per column
-#                 # => remove each number in column from list of candiates
-#                 for idx in range(0, SIZE):
-#                     column_cell = cell.column().cell(idx)
-#                     if column_cell.is_fix():
-#                         cell.remove_candidate(column_cell.number())
-#                 # each number only once per box
-#                 # => remove each number in box from list of candiates
-#                 for i in range(0, box_size):
-#                     for j in range(0, box_size):
-#                         box_cell = cell.box().cell(i,j)
-#                         if box_cell.is_fix():
-#                             cell.remove_candidate(box_cell.number())
-#
-#                 # solve cell
-#                 if cell.num_candidates() == 0:
-#                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
-#                 elif cell.num_candidates() == 1:
-#                     update_cell(cell, cell.candidates()[0])
-#                     num_fixed_cells += 1
-#                     turn_has_improved = True
-#
-#     num_turns += 1
-#     print_sudoku("AFTER CELL CANDIDATE ELIMINATION")
-# '''
+    turn_has_improved = False
+    for row_idx in range(0, SIZE):
+        for col_idx in range(0, SIZE):
+            cell = cells[row_idx][col_idx]
+            if not cell.is_fix():
+                # each number only once per row
+                # => remove each number in row from list of candiates
+                for idx in range(0, SIZE):
+                    row_cell = cell.row().cell(idx)
+                    if row_cell.is_fix():
+                        cell.remove_candidate(row_cell.number())
+                # each number only once per column
+                # => remove each number in column from list of candiates
+                for idx in range(0, SIZE):
+                    column_cell = cell.column().cell(idx)
+                    if column_cell.is_fix():
+                        cell.remove_candidate(column_cell.number())
+                # each number only once per box
+                # => remove each number in box from list of candiates
+                for i in range(0, box_size):
+                    for j in range(0, box_size):
+                        box_cell = cell.box().cell(i,j)
+                        if box_cell.is_fix():
+                            cell.remove_candidate(box_cell.number())
+
+                # solve cell
+                if cell.num_candidates() == 0:
+                    sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+                elif cell.num_candidates() == 1:
+                    update_cell(cell, cell.candidates()[0])
+                    num_fixed_cells += 1
+                    turn_has_improved = True
+
+    num_turns += 1
+    print_sudoku("AFTER CELL CANDIDATE ELIMINATION")
+'''
 #             print_str = ""
 #             if cell.is_fix():
 #                 print_str = "FIX: " + str(cell.number())

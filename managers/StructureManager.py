@@ -28,18 +28,17 @@ class StructureManager():
         # number of fixed cells
         self.num_fixed_cells_ = 0
 
-        # structures
-        self.cells_ = []
-        self.rows_ = []
-        self.columns_ = []
-        self.boxes_ = []
-
 
     # ==========================================================================
     # MAIN FUNCTION: setup all structures
     # ==========================================================================
 
     def setup(self, numbers):
+
+        cells = []
+        rows = []
+        columns = []
+        boxes = []
 
         # ----------------------------------------------------------------------
         # setup Cells with Numbers
@@ -48,13 +47,13 @@ class StructureManager():
             cells_in_row = []
             for col in range(0, self.size_):
                 cells_in_row.append(Cell(numbers))
-            self.cells_.append(cells_in_row)
+            cells.append(cells_in_row)
 
         # ----------------------------------------------------------------------
         # setup Rows with Cells
         # ----------------------------------------------------------------------
         for row_idx in range(0, self.size_):
-            self.rows_.append(Line(row_idx, self.cells_[row_idx]))
+            rows.append(Line(row_idx, cells[row_idx]))
 
         # ----------------------------------------------------------------------
         # setup Columns with Cells
@@ -68,11 +67,11 @@ class StructureManager():
         # fill column with designated cell
         for row_idx in range(0, self.size_):
             for col_idx in range(0, self.size_):
-                temp_columns[col_idx].append(self.cells_[row_idx][col_idx])
+                temp_columns[col_idx].append(cells[row_idx][col_idx])
 
         # finalize column
         for col_idx in range(0, self.size_):
-            self.columns_.append(Line(col_idx, temp_columns[col_idx]))
+            columns.append(Line(col_idx, temp_columns[col_idx]))
 
         # cleanup
         del temp_columns
@@ -87,7 +86,7 @@ class StructureManager():
             box = []
             for box_col in range(0, self.box_size_):
                 box.append([])
-            self.boxes_.append(box)
+            boxes.append(box)
 
         # fill outer boxes with inner boxes
         for outer_box_row_idx in range(0, self.box_size_):
@@ -101,11 +100,11 @@ class StructureManager():
                 # for each inner box: obtain inner box containing n cells
                 for inner_box_row_idx in range(0, self.box_size_):
                     for inner_box_col_idx in range(0, self.box_size_):
-                        cell = self.cells_[outer_box_row_idx*self.box_size_ + inner_box_row_idx][outer_box_col_idx*self.box_size_ + inner_box_col_idx]
+                        cell = cells[outer_box_row_idx*self.box_size_ + inner_box_row_idx][outer_box_col_idx*self.box_size_ + inner_box_col_idx]
                         inner_box[inner_box_row_idx][inner_box_col_idx] = cell
                 # create new Box
                 new_box = Box(outer_box_row_idx, outer_box_col_idx, inner_box)
-                self.boxes_[outer_box_row_idx][outer_box_col_idx] = new_box
+                boxes[outer_box_row_idx][outer_box_col_idx] = new_box
 
 
         # ----------------------------------------------------------------------
@@ -113,14 +112,13 @@ class StructureManager():
         # ----------------------------------------------------------------------
         for row_idx in range(0, self.size_):
             for col_idx in range(0, self.size_):
-                self.cells_[row_idx][col_idx].setup_structures(
-                    self.rows_[row_idx],
-                    self.columns_[col_idx],
-                    self.boxes_[row_idx//self.box_size_][col_idx//self.box_size_]
+                cells[row_idx][col_idx].setup_structures(
+                    rows[row_idx],
+                    columns[col_idx],
+                    boxes[row_idx//self.box_size_][col_idx//self.box_size_]
                 )
 
-        # bad design!
-        return [self.cells_, self.rows_, self.columns_, self.boxes_]
+        return [cells, rows, columns, boxes]
 
 
     # ==========================================================================
@@ -164,20 +162,20 @@ class StructureManager():
     # HELPER FUNCTION
     # ==========================================================================
 
-    def print_sudoku(self, label=""):
+    def print_sudoku(self, label="", cells=None):
 
         print("=================")
         for row_idx in range(0, self.size_):
             nums_in_row = []
             for col_idx in range(0, self.size_):
-                cell = self.cells_[row_idx][col_idx]
+                cell = cells[row_idx][col_idx]
                 if cell.is_fix():
                     nums_in_row.append(str(cell.number().value()))
                 else:
                     nums_in_row.append("·")
             print(" ".join(nums_in_row))
         print("=================")
-        print(label, "|", self.num_fixed_cells_, "cells (", round((self.num_fixed_cells_*100)/(self.size_*self.size_),2), "% ) completed!")
+        print(label, "|", self.num_fixed_cells_, "cells (", round((self.num_fixed_cells_*100)/(self.size_*self.size_),1), "% ) completed!")
         print("\n")
 
 
@@ -187,15 +185,3 @@ class StructureManager():
 
     def get_num_fixed_cells(self):
         return self.num_fixed_cells_
-
-    def get_cell(self, row_idx, col_idx):
-        return self.cells_[row_idx][col_idx]
-
-    def get_row(self, row_idx):
-        return self.rows_[row_idx]
-
-    def get_columns(self, columns_idx):
-        return self.columns_[columns_idx]
-
-    def get_boxes(self, box_row_idx, box_col_idx):
-        return self.boxes_[box_row_idx][box_col_idx]

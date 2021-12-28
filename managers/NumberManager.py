@@ -20,7 +20,6 @@ class NumberManager():
 
         self.max_ = size + 1
 
-        self.numbers_ = [None]  # number with idx 0 not defined for Sudoku!
 
 
     # ==========================================================================
@@ -29,11 +28,13 @@ class NumberManager():
 
     def setup(self):
 
+        numbers = [None]  # number with idx 0 not defined for Sudoku!
+
         # NB: numbers range from 1 to 9
         for num_idx in range(1, self.max_):
-            self.numbers_.append(Number(num_idx, self.max_))
+            numbers.append(Number(num_idx, self.max_))
 
-        return self.numbers_
+        return numbers
 
 
 
@@ -48,7 +49,7 @@ class NumberManager():
         # var 2: number given and within range (1 … 9)
         number = int(number)
         if number in range (0, self.max_):
-            return(self.numbers_[number])
+            return(number)
         # var 3: number given but out of range
         else:
             sys.exit("Error: number out of range of this Sudoku")
