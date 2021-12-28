@@ -8,7 +8,8 @@
 from Sudoku import *
 from structure.Cell import Cell
 from structure.Line import Line
-from structure.Square import Square
+from structure.Box import Box
+# from structure.Number import Number
 
 # Helpers
 import sys
@@ -27,7 +28,7 @@ numbers = []
 cells = []
 rows = []
 columns = []
-squares = []
+boxes = []
 
 num_fixed_cells = 0
 num_turns = 0
@@ -42,7 +43,7 @@ num_turns = 0
 # ============================================================================
 def update_cell(cell, number):
     # Cell <-> Number
-    # => Row / Column / Square updates automatically ?
+    # => Row / Column / Box updates automatically ?
     cell.number(number)
     # remove all candidates
 
@@ -112,41 +113,41 @@ for col_idx in range(0, SIZE):
 
 del temp_columns
 
-# Square -> Cell -> Number
-square_size = int(math.sqrt(SIZE))
+# Box -> Cell -> Number
+box_size = int(math.sqrt(SIZE))
 
-# prepare structure: square[x][y]
-for square_row in range(0, square_size):
-    squares.append([])
-    for square_col in range(0, square_size):
-        squares[square_row].append([])
+# prepare structure: box[x][y]
+for box_row in range(0, box_size):
+    boxes.append([])
+    for box_col in range(0, box_size):
+        boxes[box_row].append([])
 
-# fill squares with inner squares
-for outer_square_row_idx in range(0, square_size):
-    for outer_square_col_idx in range(0, square_size):
-        # for each outer square: prepare inner square (same size)
-        inner_square = []
-        for inner_square_row in range(0, square_size):
-            inner_square.append([])
-            for inner_square_col in range(0, square_size):
-                inner_square[inner_square_row].append([])
-        # for each inner square: obtain inner square containing n cells
-        for inner_square_row_idx in range(0, square_size):
-            for inner_square_col_idx in range(0, square_size):
-                cell = cells[outer_square_row_idx*square_size + inner_square_row_idx][outer_square_col_idx*square_size + inner_square_col_idx]
-                inner_square[inner_square_row_idx][inner_square_col_idx] = cell
-        # create new Square
-        new_square = Square(outer_square_row_idx, outer_square_col_idx, inner_square)
-        squares[outer_square_row_idx][outer_square_col_idx] = new_square
+# fill boxes with inner boxes
+for outer_box_row_idx in range(0, box_size):
+    for outer_box_col_idx in range(0, box_size):
+        # for each outer box: prepare inner box (same size)
+        inner_box = []
+        for inner_box_row in range(0, box_size):
+            inner_box.append([])
+            for inner_box_col in range(0, box_size):
+                inner_box[inner_box_row].append([])
+        # for each inner box: obtain inner box containing n cells
+        for inner_box_row_idx in range(0, box_size):
+            for inner_box_col_idx in range(0, box_size):
+                cell = cells[outer_box_row_idx*box_size + inner_box_row_idx][outer_box_col_idx*box_size + inner_box_col_idx]
+                inner_box[inner_box_row_idx][inner_box_col_idx] = cell
+        # create new Box
+        new_box = Box(outer_box_row_idx, outer_box_col_idx, inner_box)
+        boxes[outer_box_row_idx][outer_box_col_idx] = new_box
 
 
-# Connect Cell <-> Row / Column / Square
+# Connect Cell <-> Row / Column / Box
 for row_idx in range(0, SIZE):
     for col_idx in range(0, SIZE):
         cells[row_idx][col_idx].set_structures(
             rows[row_idx],          # row
             columns[col_idx],       # column
-            squares[row_idx//square_size][col_idx//square_size]
+            boxes[row_idx//box_size][col_idx//box_size]
         )
 
 
@@ -211,13 +212,13 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
                     column_cell = cell.column().cell(idx)
                     if column_cell.is_fix():
                         cell.remove_candidate(column_cell.number())
-                # each number only once per square
-                # => remove each number in square from list of candiates
-                for i in range(0, square_size):
-                    for j in range(0, square_size):
-                        square_cell = cell.square().cell(i,j)
-                        if square_cell.is_fix():
-                            cell.remove_candidate(square_cell.number())
+                # each number only once per box
+                # => remove each number in box from list of candiates
+                for i in range(0, box_size):
+                    for j in range(0, box_size):
+                        box_cell = cell.box().cell(i,j)
+                        if box_cell.is_fix():
+                            cell.remove_candidate(box_cell.number())
 
                 # solve cell
                 if cell.num_candidates() == 0:
@@ -245,9 +246,9 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
 '''
 # --------------------------------------------------------------------------
 # 2) NUMBER ELIMINATION
-#    check for each row/column/square:
+#    check for each row/column/box:
 #       each number must appear exactly once
-#       -> determine how many candidates within the row/column/square there are
+#       -> determine how many candidates within the row/column/box there are
 #       => if only one candidate remains: assign it!
 # --------------------------------------------------------------------------
 
@@ -270,10 +271,10 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
         for number in numbers_left:
             candidates = []
             # check for each cell if
-            # 1. empty, 2. number not is in this row and 3. not in this square
+            # 1. empty, 2. number not is in this row and 3. not in this box
             for cell_idx in range(0, SIZE):
                 cell = column.cell(cell_idx)
-                if not cell.is_fix() and not cell.row().has_number(number) and not cell.square().has_number(number):
+                if not cell.is_fix() and not cell.row().has_number(number) and not cell.box().has_number(number):
                     candidates.append(cell)
             # if only one candidate => set it!
             if len(candidates) == 1:
@@ -303,10 +304,10 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
         for number in numbers_left:
             candidates = []
             # check for each cell if
-            # 1. empty, 2. number not is in this column and 3. not in this square
+            # 1. empty, 2. number not is in this column and 3. not in this box
             for row_idx in range(0, SIZE):
                 cell = row.cell(row_idx)
-                if not cell.is_fix() and not cell.column().has_number(number) and not cell.square().has_number(number):
+                if not cell.is_fix() and not cell.column().has_number(number) and not cell.box().has_number(number):
                     candidates.append(cell)
             # if only one candidate => set it!
             if len(candidates) == 1:
@@ -320,15 +321,15 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
     print_sudoku("AFTER NUMBER ELIMINATION (ROWS)")
 
     # ----------------------------------------------------------------------
-    # Number elimination: Square
+    # Number elimination: Box
     # ----------------------------------------------------------------------
 
-    for square_row in squares:
-        for square in square_row:
-            # check for each number if it is already present in the square
+    for box_row in boxes:
+        for box in box_row:
+            # check for each number if it is already present in the box
             numbers_left = []
             for number in numbers:
-                if not square.has_number(number):
+                if not box.has_number(number):
                     numbers_left.append(number)
 
             # check for each left over number how many potential candidates
@@ -336,10 +337,10 @@ while turn_has_improved and num_fixed_cells < SIZE*SIZE:
             for number in numbers_left:
                 candidates = []
                 # check for each cell if
-                # 1. empty, 2. number not is in this column and 3. not in this square
-                for row_idx in range(0, square_size):
-                    for col_idx in range(0, square_size):
-                        cell = square.cell(row_idx, col_idx)
+                # 1. empty, 2. number not is in this column and 3. not in this box
+                for row_idx in range(0, box_size):
+                    for col_idx in range(0, box_size):
+                        cell = box.cell(row_idx, col_idx)
                         if not cell.is_fix() and not cell.column().has_number(number) and not cell.row().has_number(number):
                             candidates.append(cell)
                 # if only one candidate => set it!
@@ -373,7 +374,7 @@ print_sudoku()
 # print(cells[3][4].column().row(3).number())
 # print(rows[3].column(4).number())
 # print(columns[4].row(3).number())
-# print(squares[0][1].cell(1,2).number())
+# print(boxes[0][1].cell(1,2).number())
 # print(numbers[2].counter())
 # print(cells[1][7].number())
 '''

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-class Square():
+class Box():
 
     # CONSTRUCTOR
     def __init__ (self, row, column, cells):

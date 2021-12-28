@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-class Cell():
+class Number():
 
     # CONSTRUCTORs
-    def __init__ (self, numbers):
+    def __init__ (self, value=0):
         # row, column and box will later be set by actual Row and Column
-        self.row_ = None
-        self.column_ = None
-        self.box_ = None
-        self.number_ = None
-        self.candidates_ = numbers
+        self.value_ = value
+        self.columns_ = None
+        self.rows_ = None
+        self.boxs_ = None
 
     def set_structures(self, row, column, box):
         self.row_ = row
