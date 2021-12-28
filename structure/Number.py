@@ -5,7 +5,9 @@ import math
 
 class Number():
 
+    # ==========================================================================
     # CONSTRUCTORs
+    # ==========================================================================
     def __init__ (self, value, max):
         self.value_ = value     # actual value of the number (0 or 1 .. 9)
 
@@ -27,9 +29,47 @@ class Number():
                 inner_box.append(False)
             self.in_box_.append(inner_box)
 
-    # GETTER
+    # ==========================================================================
+    # GET NUMBER VALUE
+    # ==========================================================================
     def value(self):
         return self.value_
+
+
+    # ==========================================================================
+    # ADD STRUCTURE TO NUMBER
+    # ==========================================================================
+
+    def add_column(self, col_idx):
+        self.in_column_[col_idx] = True
+
+    def add_row(self, row_idx):
+        self.in_row_[row_idx] = True
+
+    def add_box(self, box_idx):
+        box_row_idx = box_idx[0]
+        box_col_idx = box_idx[1]
+        self.in_box_[box_row_idx][box_col_idx] = True
+
+
+    # ==========================================================================
+    # REMOVE STRUCTURE FROM NUMBER
+    # ==========================================================================
+
+    def remove_column(self, col_idx):
+        self.in_column_[col_idx] = False
+
+    def remove_row(self, row_idx):
+        self.in_row_[row_idx] = False
+
+    def remove_box(self, box_row_idx, box_col_idx):
+        self.in_box_[box_row_idx][box_col_idx] = False
+
+
+
+    # ==========================================================================
+    # GET STATUS OF STRUCTURE NUMBER
+    # ==========================================================================
 
     def is_in_column(self, column_idx):
         if column_idx in range(0, self.max_):

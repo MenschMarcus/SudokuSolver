@@ -6,12 +6,14 @@
 
 # Classes
 from Sudoku import *
-from structure.NumberManager import NumberManager
-from structure.StructureManager import StructureManager
+
+from structure.Number import Number
 from structure.Cell import Cell
 from structure.Line import Line
 from structure.Box import Box
-from structure.Number import Number
+
+from managers.NumberManager import NumberManager
+from managers.StructureManager import StructureManager
 
 # Helpers
 import sys
@@ -32,96 +34,42 @@ rows = []
 columns = []
 boxes = []
 
-num_fixed_cells = 0
 num_turns = 0
 
 
-###############################################################################
-# FUNCTIONS
-###############################################################################
+# =============================================================================
+# setup structures
+# =============================================================================
 
-# # ============================================================================
-# # update cell number => update all dependencies
-# # ============================================================================
-# def update_cell(cell, number):
-#     # Cell <-> Number
-#     # => Row / Column / Box updates automatically ?
-#     cell.number(number)
-#     # remove all candidates
-#
-#
-#
-# # ============================================================================
-# # print current status of sudoku
-# # ============================================================================
-# def print_sudoku(label=""):
-#     global num_fixed_cells
-#     global num_turns
-#     global SIZE
-#
-#     print("=================")
-#     for row_idx in range(0, SIZE):
-#         nums_in_row = []
-#         for col_idx in range(0, SIZE):
-#             num = cells[row_idx][col_idx].number()
-#             if num:
-#                 nums_in_row.append(str(num))
-#             else:
-#                 nums_in_row.append("·")
-#         print(" ".join(nums_in_row))
-#     print("=================")
-#     print(label, "turn number", num_turns, "|", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "% ) completed!")
-#     print("\n")
-
-###############################################################################
-# MAIN
-###############################################################################
-
-# setup structures:
-# numbers
+# init managers that need to know each other, as they depend on each other
+# -> bad design!
 number_manager = NumberManager(SIZE)
+structure_manager = StructureManager(SIZE)
+
+# setup numbers
 numbers = number_manager.setup()
 
-# cells -> rows, columns, boxes
-structure_manager = StructureManager(SIZE)
+# setup cells -> rows, columns, boxes
 [cells, rows, columns, boxes] = structure_manager.setup(numbers)
 
-#
-#
-# # ============================================================================
-# # FILL INITIAL NUMBERS
-# # ============================================================================
-#
-# for row_idx in range(0, SIZE):
-#     for col_idx in range(0, SIZE):
-#         # TODO: own structure: Number that cares about error handling
-#         # get numbers from original Sudoku
-#         cell_value = SUDOKU[row_idx][col_idx]
-#
-#         # set actual number
-#         try:
-#             number = int(cell_value)
-#             # error handling: number must be in range
-#             if number < 0 or number > SIZE:
-#                 sys.exit("Error: number", number, "not in range of this Sudoku")
-#
-#         # if no number is given => empty cell => 0
-#         except:
-#             number = 0
-#
-#         # print(number)
-#
-#         cell = cells[row_idx][col_idx]
-#         update_cell(cell, number)
-#
-#         if number > 0:
-#             num_fixed_cells += 1
-#
-# # ============================================================================
-# # CREATE CANDIDATES
-# # ============================================================================
-# print_sudoku("INIT ")
-#
+# fill with clues from initial sudoku ("clues")
+for row_idx in range(0, SIZE):
+    for col_idx in range(0, SIZE):
+        # get clue from original Sudoku -> Number
+        number = number_manager.check_number(SUDOKU[row_idx][col_idx])
+        # get Cell
+        cell = cells[row_idx][col_idx]
+        # update Cell <-> Number
+        structure_manager.update(cell, number)
+
+# test printout
+structure_manager.print_sudoku("INIT ")
+
+# ============================================================================
+# CREATE CANDIDATES
+# ============================================================================
+
+
 # # --------------------------------------------------------------------------
 # # 1) CANDIDATE ELIMINATION
 # #    straightforward approach: create potential candidates for each cell

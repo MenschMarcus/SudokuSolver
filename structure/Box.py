@@ -12,6 +12,9 @@ class Box():
     def cell(self, row, column):
         return self.cells_[row][column]
 
+    def idx(self):
+        return [self.row_idx_, self.column_idx_]
+
     def has_number(self, number):
         for cell_row in self.cells_:
             for cell_col in cell_row:

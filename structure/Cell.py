@@ -18,7 +18,7 @@ class Cell():
 
     # GETTER
     def is_fix(self):
-        return self.number_ != 0
+        return self.number_ != None
 
     def row(self):
         return self.row_
@@ -29,11 +29,14 @@ class Cell():
     def box(self):
         return self.box_
 
+    def number(self):
+        return self.number_
+
     def candidates(self):
         return self.candidates_
 
-    # Number
-    def number(self, number):
+    # set Number
+    def fix(self, number):
         self.number_ = number
 
     # NumberCandidates
