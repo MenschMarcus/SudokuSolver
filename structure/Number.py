@@ -1,54 +1,50 @@
 #!/usr/bin/env python3
+# NB: there is no 0 in Sudoku! => value range from 1-9
+
+import math
 
 class Number():
 
     # CONSTRUCTORs
-    def __init__ (self, value=0):
-        # row, column and box will later be set by actual Row and Column
-        self.value_ = value
-        self.columns_ = None
-        self.rows_ = None
-        self.boxs_ = None
+    def __init__ (self, value, max):
+        self.value_ = value     # actual value of the number (0 or 1 .. 9)
 
-    def set_structures(self, row, column, box):
-        self.row_ = row
-        self.column_ = column
-        self.box_ = box
+        # maximum number
+        self.max_ = max
+
+        # number already present in this column / row?
+        self.in_column_ = []
+        self.in_row_ = []
+        for i in range(0, max-1):
+            self.in_column_.append(False)
+            self.in_row_.append(False)
+
+        # number already present in this box?
+        self.in_box_ = []
+        for i in range(0, int(math.sqrt(max-1))):
+            inner_box = []
+            for j in range(0, int(math.sqrt(max-1))):
+                inner_box.append(False)
+            self.in_box_.append(inner_box)
 
     # GETTER
-    def is_fix(self):
-        return self.number_ != 0
+    def value(self):
+        return self.value_
 
-    def row(self):
-        return self.row_
-
-    def column(self):
-        return self.column_
-
-    def box(self):
-        return self.box_
-
-    def candidates(self):
-        return self.candidates_
-
-    # Number (fixed)
-    # TODO: own structure Number cares about error handling
-    def number(self, number=None):
-        if type(number) == int:
-            self.number_ = number
+    def is_in_column(self, column_idx):
+        if column_idx in range(0, self.max_):
+            return self.in_column_[column_idx]
         else:
-            return self.number_
+            sys.error("class Number: column index out of bounds")
 
-    # NumberCandidates
-    def add_candidate(self, number):
-        self.candidates_.append(number)
+    def is_in_row(self, row_idx):
+        if row_idx in range(0, self.max_):
+            return self.in_row_[row_idx]
+        else:
+            sys.error("class Number: row index out of bounds")
 
-    def remove_candidate(self, number):
-        if number in self.candidates_:
-            self.candidates_.remove(number)
-
-    def clear_candidates(self):
-        self.candidates_ = []
-
-    def num_candidates(self):
-        return len(self.candidates_)
+    def is_in_box(self, box_idx_out, box_idx_in):
+        if box_idx_out in range (0, math.sqrt(self.max_)) and box_idx_in in range (0, math.sqrt(self.max_)):
+            return self.in_box_[box_idx_out][box_idx_in]
+        else:
+            sys.error("class Number: box index out of bounds")

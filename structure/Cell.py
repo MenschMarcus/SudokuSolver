@@ -11,7 +11,7 @@ class Cell():
         self.number_ = None
         self.candidates_ = numbers
 
-    def set_structures(self, row, column, box):
+    def setup_structures(self, row, column, box):
         self.row_ = row
         self.column_ = column
         self.box_ = box
@@ -32,13 +32,9 @@ class Cell():
     def candidates(self):
         return self.candidates_
 
-    # Number (fixed)
-    # TODO: own structure Number cares about error handling
-    def number(self, number=None):
-        if type(number) == int:
-            self.number_ = number
-        else:
-            return self.number_
+    # Number
+    def number(self, number):
+        self.number_ = number
 
     # NumberCandidates
     def add_candidate(self, number):
