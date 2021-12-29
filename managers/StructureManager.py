@@ -125,17 +125,15 @@ class StructureManager():
     # MAIN FUNCTION: update Cell <-> Number
     # ==========================================================================
 
-    def update(self, cell, number):
+    def update(self, cell, number, check_row=None, check_num=None):
 
-        # get old and new state
-        was_fix_before = cell.is_fix()
-        is_fix_now = (number is not None)
+        # case 1) empty -> empty    -> nothing to do
+        # case 2) empty -> fix      -> update cell + add structures to row
+        # case 3) fix -> empty      -> impossible!
+        # case 4) fix -> fix        -> almost impossible!
 
-        # case 1) empty -> empty
-        # -> nothing to do
-
-        # case 2) empty -> fix
-        if (not was_fix_before) and (is_fix_now):
+        # case 2
+        if number is not None:
             self.num_fixed_cells_ += 1
 
             # update number in cell
@@ -146,16 +144,6 @@ class StructureManager():
             number.add_row(cell.row().idx())
             number.add_column(cell.column().idx())
             number.add_box(cell.box().idx())
-
-        # case 3) fix -> empty
-        # -> impossible!
-
-        # case 4) fix -> fix
-        elif (was_fix_before) and (is_fix_now):
-
-            # update number in cell
-            cell.fix(number)
-            cell.clear_candidates()
 
 
     # ==========================================================================

@@ -24,7 +24,7 @@ import math
 # GLOBAL VARIABLES
 ###############################################################################
 
-SUDOKU_ID = 3
+SUDOKU_ID = 1
 
 SIZE = 9
 
@@ -34,7 +34,6 @@ rows = []
 columns = []
 boxes = []
 
-num_turns = 0
 
 
 # =============================================================================
@@ -103,12 +102,14 @@ while turn_has_improved:
                     row_cell = cell.row().cell(idx)
                     if row_cell.is_fix():
                         cell.remove_candidate(row_cell.number())
+
                 # each number only once per column
                 # => remove each number in column from list of candiates
                 for idx in range(0, SIZE):
                     column_cell = cell.column().cell(idx)
                     if column_cell.is_fix():
                         cell.remove_candidate(column_cell.number())
+
                 # each number only once per box
                 # => remove each number in box from list of candiates
                 for i in range(0, box_size):
@@ -120,136 +121,128 @@ while turn_has_improved:
                 # solve cell
                 if cell.num_candidates() == 0:
                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
                 elif cell.num_candidates() == 1:
                     structure_manager.update(cell, cell.candidate())
                     turn_has_improved = True
 
-    num_turns += 1
-
 structure_manager.print_sudoku("AFTER CELL CANDIDATE ELIMINATION", cells)
 
-#             print_str = ""
-#             if cell.is_fix():
-#                 print_str = "FIX: " + str(cell.number())
-#             else:
-#                 cs = cell.candidates()
-#                 c_str = []
-#                 for c in cs:
-#                     c_str.append(str(c.value()))
-#                 print_str = ", ".join(c_str)
-#             print("Z", cell.row().idx()+1, "S", cell.column().idx()+1, ": ", print_str)
-#
-#     print("after", num_turns, "turns (1.0)", num_fixed_cells, "cells (", round((num_fixed_cells*100)/(SIZE*SIZE),2), "%) completed!")
-# '''
-# # --------------------------------------------------------------------------
-# # 2) NUMBER ELIMINATION
-# #    check for each row/column/box:
-# #       each number must appear exactly once
-# #       -> determine how many candidates within the row/column/box there are
-# #       => if only one candidate remains: assign it!
-# # --------------------------------------------------------------------------
-#
-# turn_has_improved = True
-# while turn_has_improved and num_fixed_cells < SIZE*SIZE:
-#     turn_has_improved = False
-#
-#     # ----------------------------------------------------------------------
-#     # Number elimination: Column
-#     # ----------------------------------------------------------------------
-#
-#     for column in columns:
-#         # check for each number if it is already present in the column
-#         numbers_left = []
-#         for number in numbers:
-#             if not column.has_number(number):
-#                 numbers_left.append(number)
-#         # check for each left over number how many potential candidates
-#         # there are in the column
-#         for number in numbers_left:
-#             candidates = []
-#             # check for each cell if
-#             # 1. empty, 2. number not is in this row and 3. not in this box
-#             for cell_idx in range(0, SIZE):
-#                 cell = column.cell(cell_idx)
-#                 if not cell.is_fix() and not cell.row().has_number(number) and not cell.box().has_number(number):
-#                     candidates.append(cell)
-#             # if only one candidate => set it!
-#             if len(candidates) == 1:
-#                 update_cell(candidates[0], number)
-#                 num_fixed_cells += 1
-#                 turn_has_improved = True
-#             if len(candidates) == 0:
-#                 sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
-#             # TODO: update candidates for cell? for numbers?
-#
-#     num_turns += 1
-#     print_sudoku("AFTER NUMBER ELIMINATION (COLUMNS)")
-#
-#
-#     # ----------------------------------------------------------------------
-#     # Number elimination: Row
-#     # ----------------------------------------------------------------------
-#
-#     for row in rows:
-#         # check for each number if it is already present in the row
-#         numbers_left = []
-#         for number in numbers:
-#             if not row.has_number(number):
-#                 numbers_left.append(number)
-#         # check for each left over number how many potential candidates
-#         # there are in the row
-#         for number in numbers_left:
-#             candidates = []
-#             # check for each cell if
-#             # 1. empty, 2. number not is in this column and 3. not in this box
-#             for row_idx in range(0, SIZE):
-#                 cell = row.cell(row_idx)
-#                 if not cell.is_fix() and not cell.column().has_number(number) and not cell.box().has_number(number):
-#                     candidates.append(cell)
-#             # if only one candidate => set it!
-#             if len(candidates) == 1:
-#                 update_cell(candidates[0], number)
-#                 num_fixed_cells += 1
-#                 turn_has_improved = True
-#             if len(candidates) == 0:
-#                 sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
-#
-#     num_turns += 1
-#     print_sudoku("AFTER NUMBER ELIMINATION (ROWS)")
-#
-#     # ----------------------------------------------------------------------
-#     # Number elimination: Box
-#     # ----------------------------------------------------------------------
-#
-#     for box_row in boxes:
-#         for box in box_row:
-#             # check for each number if it is already present in the box
-#             numbers_left = []
-#             for number in numbers:
-#                 if not box.has_number(number):
-#                     numbers_left.append(number)
-#
-#             # check for each left over number how many potential candidates
-#             # there are in the row
-#             for number in numbers_left:
-#                 candidates = []
-#                 # check for each cell if
-#                 # 1. empty, 2. number not is in this column and 3. not in this box
-#                 for row_idx in range(0, box_size):
-#                     for col_idx in range(0, box_size):
-#                         cell = box.cell(row_idx, col_idx)
-#                         if not cell.is_fix() and not cell.column().has_number(number) and not cell.row().has_number(number):
-#                             candidates.append(cell)
-#                 # if only one candidate => set it!
-#                 if len(candidates) == 1:
-#                     update_cell(candidates[0], number)
-#                     num_fixed_cells += 1
-#                     turn_has_improved = True
-#                 if len(candidates) == 0:
-#                     sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
-#
-#     num_turns += 1
-#     print_sudoku("AFTER NUMBER ELIMINATION (SQARES)")
+# --------------------------------------------------------------------------
+# 2) REVERSE CANDIDATE ELIMINATION
+#    check for each row/column/box:
+#       each number must appear exactly once
+#       -> determine how many candidates within the row/column/box there are
+#       => if only one candidate remains: assign it!
+# --------------------------------------------------------------------------
+
+turn_has_improved = True
+while turn_has_improved:
+
+    turn_has_improved = False
+
+    # ----------------------------------------------------------------------
+    # Number elimination: Column
+    # ----------------------------------------------------------------------
+
+    for column in columns:
+
+        # check for each number if it is already present in the column
+        numbers_left = []
+        for number in numbers:
+            if number and not column.has_number(number):
+                numbers_left.append(number)
+
+        # check for each remaining number how many potential candidates
+        # there are in the column
+        for number in numbers_left:
+            cell_candidates = []
+            # check for each cell if
+            # 1. empty, 2. number not is in this row and 3. not in this box
+            for cell_idx in range(0, SIZE):
+                cell = column.cell(cell_idx)
+                if not cell.is_fix() and not cell.row().has_number(number) and not cell.box().has_number(number):
+                    cell_candidates.append(cell)
+
+            # error handling
+            if len(cell_candidates) == 0:
+                sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+            # if only one candidate => set it!
+            elif len(cell_candidates) == 1:
+                structure_manager.update(cell_candidates[0], number)
+                turn_has_improved = True
+
+    structure_manager.print_sudoku("AFTER REVERSE CANDIDATE ELIMINATION (COLUMNS)", cells)
+
+
+    # ----------------------------------------------------------------------
+    # Number elimination: Row
+    # ----------------------------------------------------------------------
+
+    for row in rows:
+        # check for each number if it is already present in the row
+        numbers_left = []
+        for number in numbers:
+            if number:
+                # print("A", row.idx(), number.value(), row.has_number(number))
+                if number and not row.has_number(number):
+                    numbers_left.append(number)
+                    # print("B", row.idx(), number.value())
+        # print("XXX")
+
+        # check for each remaining number how many potential candidates
+        # there are in the row
+        for number in numbers_left:
+            # print("C", row.idx(), number.value())
+            cell_candidates = []
+            # check for each cell if
+            # 1. empty, 2. number not is in this column and 3. not in this box
+            for row_idx in range(0, SIZE):
+                cell = row.cell(row_idx)
+                if not cell.is_fix() and not cell.column().has_number(number) and not cell.box().has_number(number):
+                    cell_candidates.append(cell)
+            # if only one candidate => set it!
+
+            if len(cell_candidates) == 1:
+                structure_manager.update(cell_candidates[0], number, rows[8], numbers[9])
+                turn_has_improved = True
+            if len(cell_candidates) == 0:
+                sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+    structure_manager.print_sudoku("AFTER REVERSE CANDIDATE ELIMINATION (ROWS)", cells)
+
+    # ----------------------------------------------------------------------
+    # Number elimination: Box
+    # ----------------------------------------------------------------------
+
+    for box_row in boxes:
+        for box in box_row:
+            # check for each number if it is already present in the box
+            numbers_left = []
+            for number in numbers:
+                if number and not box.has_number(number):
+                    numbers_left.append(number)
+
+            # check for each remaining number how many potential candidates
+            # there are in the row
+            for number in numbers_left:
+                cell_candidates = []
+                # check for each cell if
+                # 1. empty, 2. number not is in this column and 3. not in this box
+                for row_idx in range(0, box_size):
+                    for col_idx in range(0, box_size):
+                        cell = box.cell(row_idx, col_idx)
+                        if not cell.is_fix() and not cell.column().has_number(number) and not cell.row().has_number(number):
+                            cell_candidates.append(cell)
+                # if only one candidate => set it!
+                if len(cell_candidates) == 1:
+                    structure_manager.update(cell_candidates[0], number)
+                    turn_has_improved = True
+                if len(cell_candidates) == 0:
+                    sys.exit("ERROR: no candidate for this cell left => probaly a typo in the initial Sudoku?")
+
+    structure_manager.print_sudoku("AFTER REVERSE CANDIDATE ELIMINATION (BOXES)", cells)
 #
 # # --------------------------------------------------------------------------
 # # 3) BACKTRACKING
