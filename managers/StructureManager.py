@@ -122,23 +122,45 @@ class StructureManager():
 
 
     # ==========================================================================
-    # MAIN FUNCTION: update Cell <-> Number
+    # MAIN FUNCTION -> HEART OF THE PROGRAM
+    # update Cell <-> Number recursively:
+    # as soon as number of candidates for a cell is 1 => fix it!
     # ==========================================================================
 
-    def update(self, cell, number, check_row=None, check_num=None):
+    def update(self, cell, number):
 
-        # case 1) empty -> empty    -> nothing to do
-        # case 2) empty -> fix      -> update cell + add structures to row
-        # case 3) fix -> empty      -> impossible!
-        # case 4) fix -> fix        -> almost impossible!
+        # cells can either be fix or empty
+        # idea: cells never get re-fixed: as soon as fix, they remain so
+        # => only two cases:
+        #   case 1) update with None => cell remains empty => nothing to do
+        #   case 2) update with Number
+        #   => update cell, its dependend candidates, and number structures
 
-        # case 2
         if number is not None:
             self.num_fixed_cells_ += 1
 
-            # update number in cell
+            # fix number in cell
             cell.fix(number)
-            cell.clear_candidates()
+            cell.clear_candidates() # TODO: unclean design -> get rid of it?
+
+            # list of all cells that are in the same row, column, or box
+            depending_cells = []
+
+            # remove number from list of candidates of all cells in this row
+            for idx in range(0, self.size_):
+                depending_cells.append(cell.row().cell(idx))
+                depending_cells.append(cell.column().cell(idx))
+
+            # remove number from list of candidates of all cells in this box
+            for i in range(0, self.box_size_):
+                for j in range(0, self.box_size_):
+                    depending_cells.append(cell.box().cell(i,j))
+
+            for depending_cell in depending_cells:
+                depending_cell.remove_candidate(number)
+                if depending_cell.num_candidates() == 1:
+                    self.update(depending_cell, depending_cell.candidate())
+                    # recursion, baby!
 
             # add structures to number
             number.add_row(cell.row().idx())
